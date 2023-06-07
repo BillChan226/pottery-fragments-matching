@@ -49,9 +49,9 @@ def read_cloudpoint(objFilePath):
             if strs[0] == "vn":
                 continue
             if strs[0] == "f":
-                face1 = strs[1].split("//")
-                face2 = strs[2].split("//")
-                face3 = strs[3].split("//")
+                face1 = strs[1].split("/")
+                face2 = strs[2].split("/")
+                face3 = strs[3].split("/")
                 e1 = [int(face1[0])-1, int(face2[0])-1]
                 e2 = [int(face1[0])-1, int(face3[0])-1]
                 e3 = [int(face2[0])-1, int(face3[0])-1]
@@ -121,36 +121,45 @@ def extract_topology(vertices, edges):
                     print("yes!", points[-1])
                     break
         length_mem = len(points)
-    # break
-        
-        #print("length of points", len(points))
-        #if len(points)==65: break
-
-    print("points", points)
-
-
+      
     # Define sample data points for a 3D curve
     curvature = []
     torsion = []
+    boundary_vertices = []
 
     print("max(set_boundary)", max(set_boundary))
+
     for p in range(len(points)):
         x = [vertices[points[p-1]][0], vertices[points[p]][0], vertices[(points[(p+1)%len(points)])][0]]
         y = [vertices[points[p-1]][1], vertices[points[p]][1], vertices[(points[(p+1)%len(points)])][1]]
         z = [vertices[points[p-1]][2], vertices[points[p]][2], vertices[(points[(p+1)%len(points)])][2]]
+
+        p1 = vertices[points[p-1]]
+        p2 = vertices[points[p]]
+        p3 = vertices[(points[(p+1)%len(points)])]
+
+        boundary_vertices.append(p2)
+
+        p_cur, p_tor = calculate_curvature_and_torsion(np.array([p1, p2, p3]))
+
         # print("x", x)
         # print("y", y)
         # print("z", z)
-        p_cur, p_tor = calculate_curvature_and_torsion(np.array([x, y, z]).T)
-        curvature.append(p_cur[1])
-        torsion.append(p_tor[1])
+        # p_cur, p_tor = calculate_curvature_and_torsion(np.array([x, y, z]).T)
+        # curvature.append(p_cur[1])
+        # torsion.append(p_tor[1])
+
+        curvature.append(p_cur)
+        torsion.append(p_tor)
         # print("Curvature:", p_cur[1])
         # print("Torsion:", p_tor[1])
+
+
    
     print("boundary", boundary)
     print("num of boundary", np.shape(boundary)[0])
 
-    return boundary, curvature, torsion, points
+    return boundary, curvature, torsion, points, boundary_vertices
 
 
 def circular_substring_matching(C1, C2, epsilon):
@@ -199,42 +208,51 @@ def circular_substring_matching(C1, C2, epsilon):
 
     return M, max_match, s_r1, s_r2
 
-
-
 # #data = np.array(objects["CuscuseraSuperior_cell.002\n"])
 # #print("objects", objects)
-o1, e1 = read_cloudpoint("./flask_shatter/5.obj")
+o1, e1 = read_cloudpoint("./sphere_shatter/2.obj")
 vertices1 = np.array(o1)
 edges1 = np.array(e1)
-
 print("vertices1", vertices1)
 print("edges1", edges1)
 
-boundary1, curvature1, torsion1, points1 = extract_topology(vertices1, edges1)
-
-o2, e2 = read_cloudpoint("./flask_shatter/4.obj")
+boundary1, curvature1, torsion1, points1, boundary_vertices1 = extract_topology(vertices1, edges1)
+print("boundary_vertices1", boundary_vertices1)
+np.savetxt('boundary1.txt', boundary_vertices1, fmt='%s')
+print("#################")
+print("curvature1", curvature1)
+print("torsion1", torsion1)
+print("#################")
+o2, e2 = read_cloudpoint("./sphere_shatter/4.obj")
 vertices2 = np.array(o2)
 edges2 = np.array(e2)
 
-# vertice2_original = np.array(o2)
+vertice2_original = np.array(o2)
 
-# Translate
-t = np.random.rand(dim)*translation
-vertices2 += t
+# # Translate
+# t = np.random.rand(dim)*translation*0.5
+# vertices2 += t
 
-# Rotate
-R = rotation_matrix(np.random.rand(dim), np.random.rand() * rotation)
-vertices2 = np.dot(R, vertices2.T).T
+# # Rotate
+# R = rotation_matrix(np.random.rand(dim), np.random.rand() * rotation)
+# vertices2 = np.dot(R, vertices2.T).T
 
-# Add noise
-vertices2 += np.random.randn(np.shape(vertices2)[0], dim) * noise_sigma * 3
+# # Add noise
+# vertices2 += np.random.randn(np.shape(vertices2)[0], dim) * noise_sigma * 0.1
 
 print("vertices2", vertices2)
 print("edges2", edges2)
 
-boundary2, curvature2, torsion2, points2 = extract_topology(vertices2, edges2)
+boundary2, curvature2, torsion2, points2, boundary_vertices2 = extract_topology(vertices2, edges2)
+
+# save boundary2 to a file
+print("boundary_vertices2", boundary_vertices2)
+np.savetxt('boundary2.txt', boundary_vertices2, fmt='%s')
+
+print("#################")
 print("curvature2", curvature2)
-print("vertices1", vertices1)
+print("torsion2", torsion2)
+print("#################")
 # plt.plot(vertices1)
 # plt.show()
 
@@ -243,19 +261,9 @@ string2 = list(zip(curvature2, torsion2))
 print("string1", string1)
 print("\nstring2", string2)
 
-# # Translate
-# t = np.random.rand(dim)*translation*2
-# vertices2 += t
-
-# # Rotate
-# R = rotation_matrix(np.random.rand(dim), np.random.rand() * rotation)
-# vertices2 = np.dot(R, vertices2.T).T
-
-# # Add noise
-# vertices2 += np.random.randn(np.shape(vertices2)[0], dim) * noise_sigma 
-
-M_dist, substring, s_r1, s_r2 = circular_substring_matching(string1, string2, epsilon=0.1)
-
+M_dist, substring, s_r1, s_r2 = circular_substring_matching(string1, string2, epsilon=0.5)
+# print M_dist to a file M.txt
+np.savetxt('M.txt', M_dist, fmt='%f')
 print("M_dist", M_dist)
 print("substring", substring)
 print("s_r1", s_r1)
@@ -332,7 +340,6 @@ for i in range(1,len(sub_vertices2)):
     lines2.append(o3d.geometry.LineSet(points=o3d.utility.Vector3dVector(
         [vertices2[sub_boundary[i-1]], vertices2[sub_boundary[i]]]), lines=o3d.utility.Vector2iVector([[0, 1]])))
 print("lines2", np.shape(np.asarray(lines2))[0])
-
 
 o3d.visualization.draw_geometries([pcd1,pcd2,pcd3]+lines+lines2)
 

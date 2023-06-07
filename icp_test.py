@@ -3,12 +3,12 @@ import time
 import icp
 
 # Constants
-N = 10                                    # number of random points in the dataset
-num_tests = 100                             # number of test iterations
-dim = 3                                     # number of dimensions of the points
-noise_sigma = .01                           # standard deviation error to be added
-translation = .1                            # max translation of the test set
-rotation = .1                               # max rotation (radians) of the test set
+N = 10                                 # number of random points in the dataset
+num_tests = 100                        # number of test iterations
+dim = 3                                # number of dimensions of the points
+noise_sigma = .01                      # standard deviation error to be added
+translation = .1                       # max translation of the test set
+rotation = .1                          # max rotation (radians) of the test set
 
 
 def rotation_matrix(axis, theta):

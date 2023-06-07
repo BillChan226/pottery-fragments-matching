@@ -8,6 +8,7 @@ import open3d as o3d
 from scipy.spatial.distance import cdist
 from scipy.optimize import curve_fit
 from scipy.interpolate import splprep, splev
+from scipy.misc import derivative
 from math import sqrt
 from curve import calculate_curvature_and_torsion
 from icp import rotation_matrix, best_fit_transform, nearest_neighbor, icp
@@ -29,6 +30,23 @@ rotation = .5                              # max rotation (radians) of the test 
 #o3d.visualization.draw_geometries([mesh])
 # objFilePath = "./flask_shatter/4.obj"
 
+
+# # calculate 
+# def calculate_curvature_points(points):
+#     print("points", points)
+#     # first approximate a quadratic curve that pass through these 3 points
+#     x = np.array([points[0][0], points[1][0], points[2][0]])
+#     y = np.array([points[0][1], points[1][1], points[2][1]])
+#     z = np.array([points[0][2], points[1][2], points[2][2]])
+#     tck, u = splprep([x, y, z], s=0, k=2)
+#     # now calculate the curvature at points[1]
+#     dx, dy, dz = splev(u, tck, der=1)
+#     d2x, d2y, d2z = splev(u, tck, der=2)
+#     curvature = np.linalg.norm(np.cross(np.array([dx[1], dy[1], dz[1]]), np.array([d2x[1], d2y[1], d2z[1]]))) / np.linalg.norm(np.array([dx[1], dy[1], dz[1]]))**3
+#     torsion = np.sum(np.cross(np.array([dx[1], dy[1], dz[1]]), np.array([d2x[1], d2y[1], d2z[1]])) * np.array([d2x[1], d2y[1], d2z[1]])) / np.linalg.norm(np.cross(np.array([dx[1], dy[1], dz[1]]), np.array([d2x[1], d2y[1], d2z[1]])))**2
+    
+#     return curvature, torsion
+
 def read_cloudpoint(objFilePath):
 
     with open(objFilePath) as file:
@@ -49,9 +67,9 @@ def read_cloudpoint(objFilePath):
             if strs[0] == "vn":
                 continue
             if strs[0] == "f":
-                face1 = strs[1].split("//")
-                face2 = strs[2].split("//")
-                face3 = strs[3].split("//")
+                face1 = strs[1].split("/")
+                face2 = strs[2].split("/")
+                face3 = strs[3].split("/")
                 e1 = [int(face1[0])-1, int(face2[0])-1]
                 e2 = [int(face1[0])-1, int(face3[0])-1]
                 e3 = [int(face2[0])-1, int(face3[0])-1]
@@ -142,8 +160,10 @@ def extract_topology(vertices, edges):
         # print("y", y)
         # print("z", z)
         p_cur, p_tor = calculate_curvature_and_torsion(np.array([x, y, z]).T)
-        curvature.append(p_cur[1])
-        torsion.append(p_tor[1])
+        # curvature.append(p_cur[1])
+        # torsion.append(p_tor[1])
+        curvature.append(p_cur)
+        torsion.append(p_tor)
         # print("Curvature:", p_cur[1])
         # print("Torsion:", p_tor[1])
    
@@ -203,8 +223,9 @@ obj = []
 edge = []
 string_c = []
 pot = []
-for i in range(1, 6):
-    o, e = read_cloudpoint("./flask_shatter/" + str(i) + ".obj")
+num_of_shatter = 4
+for i in range(1, num_of_shatter+1):
+    o, e = read_cloudpoint("./sphere_shatter/" + str(i) + ".obj")
     obj.append(np.array(o))
     edge.append(np.array(e))
     boundary, curvature, torsion, points = extract_topology(obj[i-1], edge[i-1])
@@ -227,14 +248,14 @@ for i in range(1, 6):
     print("string: ", string)
     string_c.append(string)
 
-len_string = np.zeros((5,5))
+len_string = np.zeros((num_of_shatter,num_of_shatter))
 s_r_index1 = []
 s_r_index2 = []
 
-for i in range(4):
+for i in range(num_of_shatter-1):
     s_r1_i = []
     s_r2_i = []
-    for j in range(i+1, 5):
+    for j in range(i+1, num_of_shatter):
         M_dist, substring, s_r1, s_r2 = circular_substring_matching(string_c[i], string_c[j], epsilon=0.1)
         len_string[i, j] = s_r1[1] - s_r1[0] + 1
         len_string[j, i] = s_r2[1] - s_r2[0] + 1
@@ -253,23 +274,9 @@ print("s_r_index1", s_r_index1)
 print("s_r_index2", s_r_index2)
 print("len_string", len_string)
 
-
-# # create a 5x5 array of zeros
-# sym_arr1 = np.zeros((5, 5))
-
-# # fill the upper-triangular part of the array
-# for i in range(4):
-#     for j in range(i+1, 5):
-#         sym_arr1[i][j] = s_r_index1[i][j]  # take the second element of the tuple in the given array
-        
-#         # fill the lower-triangular part of the array
-#         sym_arr1[j][i] = sym_arr1[i][j]
-
-# print(sym_arr1)
-
 reassembly = []
 
-for i in range(5):
+for i in range(num_of_shatter):
 
     string_length = len_string[i]
     # s_r1_i = s_r_index1[i]
@@ -280,7 +287,7 @@ for i in range(5):
     # for j in range(len(s_r1_i)):
     #     if string_length[-j-1] > string_length[max_index]:
     #         max_index = 4-j
-    for j in range(5):
+    for j in range(num_of_shatter):
         if string_length[j] > string_length[max_index]:
             max_index = j
     #max_index = max_index + i + 1
@@ -325,7 +332,6 @@ for i in range(5):
     T, distances, iterations = icp(np.array(sub_vertices2), np.array(sub_vertices1), tolerance=0.00001)
     total_time += time.time() - start
 
-
     #print("pot[max_index]", pot[max_index])
     # Make C a homogeneous representation of B
     C = np.ones((np.shape(obj[end])[0], 4))
@@ -335,12 +341,12 @@ for i in range(5):
     reassembly.append(C)
 
 pcd = o3d.geometry.PointCloud()
-pcd.points = o3d.utility.Vector3dVector(reassembly[2][:,0:3])
+pcd.points = o3d.utility.Vector3dVector(reassembly[1][:,0:3])
 pcd1 = o3d.geometry.PointCloud()
-pcd1.points = o3d.utility.Vector3dVector(reassembly[4][:,0:3])
+pcd1.points = o3d.utility.Vector3dVector(reassembly[0][:,0:3])
 # pcd2 = o3d.geometry.PointCloud()
 # pcd2.points = o3d.utility.Vector3dVector(reassembly[2][:,0:3])
-o3d.visualization.draw_geometries([pcd, pcd1])
+o3d.visualization.draw_geometries([pcd])
 
 # print("distances,", distances,)
 # print("iterations", iterations)
