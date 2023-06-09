@@ -10,8 +10,8 @@ from scipy.optimize import curve_fit
 from scipy.interpolate import splprep, splev
 from scipy.misc import derivative
 from math import sqrt
-from curve import calculate_curvature_and_torsion
-from icp import rotation_matrix, best_fit_transform, nearest_neighbor, icp
+from utility.curve import calculate_curvature_and_torsion
+from utility.icp import rotation_matrix, best_fit_transform, nearest_neighbor, icp
 import time
 import copy
 

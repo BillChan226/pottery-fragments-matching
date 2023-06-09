@@ -9,10 +9,10 @@ from scipy.spatial.distance import cdist
 from scipy.optimize import curve_fit
 from scipy.interpolate import splprep, splev
 from scipy.misc import derivative
-from icp import rotation_matrix, best_fit_transform, nearest_neighbor, icp
+from utility.icp import rotation_matrix, best_fit_transform, nearest_neighbor, icp
 import time
 import copy
-from utility import read_cloudpoint, extract_topology, circular_substring_matching
+from utility.utility import read_cloudpoint, extract_topology, circular_substring_matching
 
 # Constants
 N = 10                                    # number of random points in the dataset
