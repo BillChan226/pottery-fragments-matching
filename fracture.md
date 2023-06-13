@@ -68,3 +68,18 @@ Matching: The best match for a given fragment (and hence its morphological class
    where $\mu=\frac{1}{m}\sum_{i=1}^mH_i$, $H_i$ is the curvature of a point $p_i$; and $\sigma(R)$ is the standard deviation of curvature, and $S(R)=(\lambda_0^R+\lambda_1^R+\lambda_2^R)^{1/2}$ and $A(R)=|\frac{\lambda^R_1}{\lambda^R_2}|^{1/2}$ are the size signature and the anisotropy signature, where $\lambda_i^R$ are the eigenvalues of the covariance matrix $M=\sum^m_{i=1}(p_i-\mu)(p_i-\mu)^T$ (principal component analysis);
 
 10. calculate similarity $SS(R_1, R_2)$ and the anisotropy similarity $AS(R_1, R_2)$ between two patches and find the similar patch pair;
+
+### Surface Segmentation
+
+**[Region growing segmentation](https://pcl.readthedocs.io/projects/tutorials/en/latest/region_growing_segmentation.html)**
+
+First of all it sorts the points by their curvature value. It needs to be done because the region begins its growth from the point that has the minimum curvature value. The reason for this is that the point with the minimum curvature is located in the flat area (growth from the flattest area allows to reduce the total number of segments).
+
+So we have the sorted cloud. Until there are no unlabeled points in the cloud, the algorithm picks up the point with minimum curvature value and starts the growth of the region. This process occurs as follows:
+
+- The picked point is added to the set called seeds;
+- For every seed point, the algorithm finds its neighbouring points;
+- Every neighbour is tested for the angle between its normal and normal of the current seed point. If the angle is less than the threshold value then current point is added to the current region;
+- After that every neighbour is tested for the curvature value. If the curvature is less than the threshold value then this point is added to the seeds;
+- Current seed is removed from the seeds;
+

@@ -27,7 +27,6 @@ def read_cloudpoint(objFilePath):
             
             strs = line.split(" ")
 
-
             if strs[0] == "v":
                 #print(obj_name)
                 object_v.append([float(strs[1]), float(strs[2]), float(strs[3])])

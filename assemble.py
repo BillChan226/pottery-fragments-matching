@@ -86,7 +86,6 @@ print(np.shape(np.asarray(poisson_mesh.triangle_normals)))
 
 mesh = poisson_mesh
 
-
 # # Cluster connected triangles in the mesh
 # clusters = mesh.cluster_connected_triangles()
 
