@@ -2,7 +2,7 @@ import numpy as np
 
 # this function is not working properly, filter is way too small
 # eventually I only apply the scipy gaussian_filter1d instead
-def gaussian_filter_smoothen(boundary_array, order)
+def gaussian_filter_smoothen(boundary_array, order):
 
     # gaussian filter
     smoothed_boundary_array = []

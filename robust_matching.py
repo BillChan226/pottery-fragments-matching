@@ -58,13 +58,17 @@ start_point = boundary_array[0]
 visited = [0]  # list of visited point indices
 unvisited = list(range(1, len(boundary_array)))  # list of unvisited point indices
 order = [0]  # list of point indices in the order they are visited
+distance_threshold = 2
 
 while unvisited:
     distances = cdist([start_point], boundary_array[unvisited]) # compute the distances between the start_point and the unvisited points
+    #print("distances", np.min(distances))
     nearest_idx = unvisited[np.argmin(distances)]
-    visited.append(nearest_idx)
+    if np.min(distances) < distance_threshold:
+        visited.append(nearest_idx)
+        order.append(visited[-1])
+        
     unvisited.remove(nearest_idx)
-    order.append(visited[-1])
 
     start_point = boundary_array[visited[-1]]
 
@@ -76,40 +80,21 @@ for i in order:
 # assuming x and y are 1D arrays of x and y values for the curve
 window_length = 6  # length of the Gaussian filter window
 sigma = window_length/3  # standard deviation of the Gaussian filter
-smoothed_y = gaussian_filter1d(boundary_points, sigma=sigma, axis=0, mode='nearest', truncate=window_length // 2)
+smoothed_points = gaussian_filter1d(boundary_points, sigma=sigma, axis=0, mode='nearest', truncate=window_length // 2)
 
-print("smoothed_y", smoothed_y)
-# gaussian filter
-smoothed_boundary_array = []
-filter_width = 6
-sum = 0
-sigma = filter_width/3  # standard deviation of the Gaussian filter
+print("smoothed_points", smoothed_points)
 
-for j in range(-filter_width, filter_width):
-    sum += np.exp(-j**2/(2*sigma**2))
+print("smoothed_points", np.shape(smoothed_points))
+print("order", np.shape(order))
 
-print("\n")
-for i in range(0, len(order)):
-    
-    filter = np.exp(-i**2/(2*sigma**2))/sum
-    # print("filter", filter)
-    p_i = 0
-    
-    for j in range(-filter_width, filter_width):
-        p_i += boundary_array[order[(i-j)%len(order)]]*filter
-        
-    smoothed_boundary_array.append(p_i)
-
-# print("smoothed_boundary_array", smoothed_boundary_array)
-boundary_array = smoothed_y
-
+boundary_array = smoothed_points
 lines = []
     # lines.append(o3d.geometry.LineSet(points=o3d.utility.Vector3dVector(
     #         [vertices[edge[0]], vertices[edge[1]]]), lines=o3d.utility.Vector2iVector([[0, 1]])))
 for i in range(1,len(order)):
     #print("edge", edge)
     lines.append(o3d.geometry.LineSet(points=o3d.utility.Vector3dVector(
-        [boundary_array[order[i-1]], boundary_array[order[i]]]), lines=o3d.utility.Vector2iVector([[0, 1]])))
+        [smoothed_points[i-1], smoothed_points[i]]), lines=o3d.utility.Vector2iVector([[0, 1]])))
 print("lines", np.shape(np.asarray(lines))[0])
 
 o3d.visualization.draw_geometries([pcd1]+lines)
