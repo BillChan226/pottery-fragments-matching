@@ -4,7 +4,7 @@ import numpy as np
 import random
 import open3d as o3d
 import pcl.pcl_visualization
-from utility import read_cloudpoint, extract_topology, circular_substring_matching
+from utility.utility import read_cloudpoint, extract_topology, circular_substring_matching
 # p = pcl.load("./table_scene_lms400.pcd")
 
 
@@ -26,17 +26,6 @@ from utility import read_cloudpoint, extract_topology, circular_substring_matchi
 def region_growing_segmentation(vertices):
 
     p = pcl.PointCloud()
-
-    # points = np.zeros((15, 3), dtype=np.float32)
-    # RAND_MAX = 1024.0
-    # for i in range(0, 15):
-    #     points[i][0] = 1024 * random.random() / (RAND_MAX + 1.0)
-    #     points[i][1] = 1024 * random.random() / (RAND_MAX + 1.0)
-    #     points[i][2] = 1.0
-
-    # points[0][2] = 2.0
-    # points[3][2] = -2.0
-    # points[6][2] = 4.0
 
     p.from_array(vertices)
 
