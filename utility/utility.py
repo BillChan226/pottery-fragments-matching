@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import cv2
-import trimesh
+#import trimesh
 import open3d as o3d
 from scipy.spatial.distance import cdist
 from scipy.optimize import curve_fit
