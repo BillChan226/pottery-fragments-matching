@@ -83,3 +83,23 @@ So we have the sorted cloud. Until there are no unlabeled points in the cloud, t
 - After that every neighbour is tested for the curvature value. If the curvature is less than the threshold value then this point is added to the seeds;
 - Current seed is removed from the seeds;
 
+
+
+### Unsupervised Learning of Visual Representations by Solving Jigsaw Puzzles
+
+**Unsupervised Learning**: Most techniques build representations by exploiting **general-purpose priors** such as **smoothness**, **sharing of factors**, **factors organized hierarchically**, **belonging to a low-dimension manifold**, **temporal and spatial coherence**, and **sparsity**.
+
+A general criterion to design a visual representation is not available! A natural choice is the goal of **disentangling factors of variation**.
+
+**Categorization**:
+
++ probabilisitic: maximize the likelihood of the **latent variables** given the **observations**. Maximum-a-posteriori(MAP) estimation: $arg\max_x p(x|y)$; Restricted Boltzmann Machine (RBM)
++ direct mapping (autoencoder)
++ manifold learning
+
+
+
+
+
+
+
