@@ -2,4 +2,4 @@
 
 exploring the intersection of both large VTP models and traditional heuristics methods to pottery relics restoration (fragments matching, 3D model alignment)
 
-![image](pottery-fragments-matching/figures/task brief.png)
+![image](https://github.com/BillChan226/pottery-fragments-matching/blob/main/figures/task%20brief.png)
