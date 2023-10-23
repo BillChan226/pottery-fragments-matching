@@ -3,7 +3,7 @@ import pcl
 import numpy as np
 import random
 import open3d as o3d
-import pcl.pcl_visualization
+# import pcl.pcl_visualization
 from utility.utility import read_cloudpoint, extract_topology, circular_substring_matching
 # p = pcl.load("./table_scene_lms400.pcd")
 
@@ -103,8 +103,3 @@ def region_growing_segmentation(vertices):
     #     v = not(visual.WasStopped())
 
     # render the segmented surfaces in 3d display
-
-
-
-
-

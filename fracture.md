@@ -94,8 +94,47 @@ A general criterion to design a visual representation is not available! A natura
 **Categorization**:
 
 + probabilisitic: maximize the likelihood of the **latent variables** given the **observations**. Maximum-a-posteriori(MAP) estimation: $arg\max_x p(x|y)$; Restricted Boltzmann Machine (RBM)
-+ direct mapping (autoencoder)
-+ manifold learning
++ direct mapping (autoencoder): **Prior**: minimize reconstruction error
++ manifold learning; **Prior**: local relationship
+
+
+
+**Self-supervised Learning**: a recent variation on the unsupervised learning theme that exploits labeling that comes for “free” with the data (indirect labels: e.g. ego-motion, relevant audio, text, labels obtained from the structure of the data)
+
+**Example**: [Paper](https://openaccess.thecvf.com/content_iccv_2015/html/Wang_Unsupervised_Learning_of_ICCV_2015_paper.html) learns feature representation with two images of the same instance, learned features focus on their similarities (such as color and texture) rather than their high-level structure.
+
+**Example Procedures**:
+
++ Patch mining follows a two-step approach:
+
+  + Extract SURF (general) feature points then use Improved Dense Trajectories (IDT) to obain motion of each SURF point; 
+  + Find the best bounding box that contains most of the moving SURF points;
+
++ Given the initial bounding box, perform tracking using KCF tracker, and take the 30th frame in the video as "similar patch" w.r.t. the first patch ("query patch");
+
++ Siamese Triplet Network: the goal is to learn a feature space such that the query patch is closer to the tracked patch as compared to any other randomly sampled patch;
+
+  ![image-20230709124831933](/Users/zhaorunchen/Library/Application Support/typora-user-images/image-20230709124831933.png)
+
+Given an image $X$ as an input of the network, its mapping in the feature space is $f(X)$. Distance in the feature space: 
+$$
+D(X_1, X_2) = 1 - \frac{f(X_1)f(x_2)}{||f(X_1)||||f(X_2)||}
+$$
+Since we want to enforce the distance between the "query patch" and "random patch" is greater than that of the "tracked patch", i.e. $D(X_q, X_r) > D(X_q, X_t)$, the hinge loss is represented as:
+
+$L(X_q, X_t, X_r) = max\{0, D(X_q, X_t)-D(X_q, X_r)+M\}$
+
+Where $M$ is the minimum feature distance gap between these pairs of patches, thus the ranking loss function:
+$$
+\min_W \frac{\lambda}{2} ||W||^2_2 + \sum_{i=1}^N max\{0, D(X_q, X_t)-D(X_q, X_r)+M\}
+$$
+
+
+
+
+
+
+
 
 
 

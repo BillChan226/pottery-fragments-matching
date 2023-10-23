@@ -1,6 +1,6 @@
 
 import pcl 
-import pcl.pcl_visualization
+#import pcl.pcl_visualization
 import numpy as np
 
 FLT_EPSILON = 1e-1 # 这个数我瞎设的，他说ismuchsmaller我也不知道具体应该多少
